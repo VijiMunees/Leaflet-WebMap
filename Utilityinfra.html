@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utility Infrastructure</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        #map{
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color:rgb(174, 0, 255);">Utility Infrastructure Web Map</h1> 
+    <div id = "map"></div>
+    
+</body>
+</html>
+//calling files and basemaps
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src ="Municipalities_Boundary.js"></script>
+<script src = "Existing_Aramco_Pipelines.js"></script>
+<script src = "Existing_Electricity_Power_Lines.js"></script>
+<script src = "Existing_Electricity_Power_Plants.js"></script>
+<script src = "Existing_Electricity_Sub_Station.js"></script>
+<script src = "Existing_Electricity_Towers.js"></script>
+<script src = "Existing_Sewage.js"></script>
+<script src = "Existing_Telecom.js"></script>
+<script src = "Existing_Water.js"></script>
+<script src = "Fiber_Networks.js"></script>
+<script src = "Power_Lines_Proposed_Route.js"></script>
+<script src = "Powerplant.png"></script>
+</script>
+<script>
+    var map = L.map('map').setView([24.7136, 46.6753], 9);
+
+var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+});
+osm.addTo(map);
+
+//Styling colors and Icons
+var color = {
+    "color": "#FF0000",
+     "radius": 4
+};
+var color1 = {
+    "color": "#800000",
+     "radius": 4
+};
+var color2 = {
+    "color": "#800080",
+     "radius": 4
+};
+var color3 = {
+    "color": "#FFFF00",
+     "radius": 4
+};
+var power = L.icon({
+    iconUrl: './Webmap_Utility/Powerplant.png',
+    iconSize: [24,24],
+});
+
+// geoJSON boundary files
+var municipalBoundaryTest = L.geoJSON(municipalBoundary ,{
+    style: function (feature) {
+        return {color: '#00FFFF', opacity: 0.6};
+    }}).addTo(map);
+var existingaramcopipeline = L.geoJSON(existingAramcoPipeline);
+var existingelectricitypowerlines = L.geoJSON(existingElectricitypowerlines,{
+    style: function (feature) {
+        return {color: 'green'};
+    }});
+var existingelectricitypowerplants = L.geoJSON(existinglectricityPowerplants,{
+    pointToLayer: function(feature,latlng){
+        return L.circleMarker(latlng,color)
+    }
+}).addTo(map);
+var existingelectricitysubstations = L.geoJSON(existingElectricitySubstations,{
+    pointToLayer: function(feature,latlng){
+        return L.circleMarker(latlng,color1)
+}});
+var existingelectricytowers = L.geoJSON(existingElectricitytowrs,{
+    pointToLayer: function(feature,latlng){
+        return L.circleMarker(latlng,color2)
+}});
+var existingsewage = L.geoJSON(existingSewage,{
+    style: function (feature) {
+        return {color: '#FF00FF'};
+    }});
+var existingwater = L.geoJSON(existingWater,{
+    style: function (feature) {
+        return {color: '#808000'};
+    }});
+var fibernetworks = L.geoJSON(fiberNetworks,{
+    style: function (feature) {
+        return {color: '#808080'};
+    }});
+var powerlinesproposedroute = L.geoJSON(powerLinesProposedrout);
+// Layers
+var utilityInfra = {
+    "Base Layer - Municipality Boundary":municipalBoundaryTest
+};
+
+ var Utility =  {
+    "Existing Aramco Pipeline":existingaramcopipeline,
+    "Existing Electricity Powerlines":existingelectricitypowerlines,
+    "Existing Electricity Plants":existingelectricitypowerplants,
+    "Existing Electricity SubStations":existingelectricitysubstations,
+    "Existing Electricity Towers":existingelectricytowers,
+    "Existing Sewage":existingsewage,
+    "Existing Water":existingwater,
+    "Fiber Networks":fibernetworks,
+    "Powerline Proposed Route":powerlinesproposedroute
+ }
+
+ //Layer controls
+ L.control.layers(utilityInfra,Utility).addTo(map);
+</script>

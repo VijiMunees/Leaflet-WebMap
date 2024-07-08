@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transport Infrastructure</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        #map{
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color:blue;">Transport Infrastructure Web Map</h1> 
+    <div id = "map"></div>
+</body>
+</html>
+//calling files and basemaps
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src ="Municipalities_Boundary.js"></script>
+<script src = "Airport Boundary.js"></script>
+<script src = "BRT_Bus_Stations.js"></script>
+<script src = "BRT_Route.js"></script>
+<script src = "Bus_Circular_Route.js"></script>
+<script src = "Bus_Community_Route.js"></script>
+<script src = "Bus_Feeder_Route.js"></script>
+<script src = "Bus_Housing.js"></script>
+<script src = "Bus_Stations.js"></script>
+<script src = "Existing Railway.js"></script>
+<script src = "Metro_Housing.js"></script>
+<script src = "Metro_Lines_Designs.js"></script>
+<script src = "Metro_Parking.js"></script>
+<script src = "Metro_Stations.js"></script>
+<script src = "Transport_Control_Center.js"></script>
+</script>
+<script>
+    var map = L.map('map').setView([24.7136, 46.6753], 9);
+
+var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+});
+osm.addTo(map);
+//Styling colors and Icons
+var color = {
+    "color": "#FF0000",
+     "radius": 4
+};
+var color1 = {
+    "color": "#800000",
+     "radius": 4
+};
+var color2 = {
+    "color": "#800080",
+     "radius": 4
+};
+var color3 = {
+    "color": "#FFFF00",
+     "radius": 4
+};
+var color4 = {
+    "color": "#008080",
+     "radius": 4
+};
+var color5 = {
+    "color": "#000000",
+     "radius": 4
+};
+var color6 = {
+    "color": "#000080",
+     "radius": 4
+};
+
+// geoJSON boundary files
+var municipalBoundaryTest = L.geoJSON(municipalBoundary,{
+    style: function (feature) {
+        return {color: '#00FFFF', opacity: 0.6};
+    }}).addTo(map);
+var airportboundary = L.geoJSON(airportBoundary,{
+    style: function (feature) {
+        return {color: 'red'};
+    }});
+var Brtbusstations = L.geoJSON(brtBusstations,{
+    pointToLayer: function(feature,latlng){
+        return L.circleMarker(latlng,color1)
+    }
+});
+var Brtroute = L.geoJSON(brtRoute,{
+    style: function (feature) {
+        return {color: 'green'};
+    }});
+var Buscircularstation = L.geoJSON(busCircularstation,{
+    style: function (feature) {
+        return {color: '#808000'};
+    }});
+var Buscommunityroute = L.geoJSON(busCommunityRoute,{
+    style: function (feature) {
+        return {color: '#008080'};
+    }});
+var Busfeederroute = L.geoJSON(busFeederRoute,{
+    style: function (feature) {
+        return {color: '#FFFF00'};
+    }});
+var Bushousing = L.geoJSON(busHousing,{
+    pointToLayer: function(feature,latlng){
+        return L.circleMarker(latlng,color2)
+    }
+}).addTo(map);
+var Busstations = L.geoJSON(busStations);
+var Existingrailway = L.geoJSON(existingRailway,{
+    style: function (feature) {
+        return {color: '#000000'};
+    }});
+var Metrohousing = L.geoJSON(metroHousing,{
+    pointToLayer: function(feature,latlng){
+        return L.circleMarker(latlng,color3)
+    }
+});
+var MetrolinesDesign = L.geoJSON(metroLinesDesign);
+var Metroparking = L.geoJSON(metroparking,{
+    pointToLayer: function(feature,latlng){
+        return L.circleMarker(latlng,color4)
+    }
+});
+var Metrostations = L.geoJSON(metroStations,{
+    pointToLayer: function(feature,latlng){
+        return L.circleMarker(latlng,color5)
+    }
+});
+var Transportcontrolcenter = L.geoJSON(transportControlCenter,{
+    pointToLayer: function(feature,latlng){
+        return L.circleMarker(latlng,color)
+    }
+});
+// Layers
+var TransportInfra = {
+    
+    "Base Layer - Municipality Boundary":municipalBoundaryTest
+    
+ }
+ var transport =  {
+     
+     "Airport Boundary":airportboundary,
+    "BRT Bus Stations":Brtbusstations,
+    "BRT Route":Brtroute,
+    "Bus Community Route":Buscommunityroute,
+    "Bus Feeder Route":Busfeederroute,
+    "Bus Housing":Bushousing,
+    "Bus Stations":Busstations,
+    "Existing Railways":Existingrailway,
+    "Metro Housing":Metrohousing,
+    "Metro Lines Design":MetrolinesDesign,
+    "Metro Parking":Metroparking,
+    "Metro Stastions":Metrostations,
+    "Transport Control Center":Transportcontrolcenter
+ }
+
+ //Layer controls
+L.control.layers(TransportInfra,transport).addTo(map);
+</script>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Map Presentation</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        #map{
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="color:rgb(255, 0, 128);">Existing Urban Network Web Map</h1> 
+    <div id = "map"></div>
+</body>
+</html>
+//calling files and basemaps
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="Urban_Boundary1.js"></script>
+<script src="Municipalities_Boundary.js"></script>
+<script src ="Districts_Boundary.js"></script>
+<script src ="01_Mega_Projects.js"></script>
+<script src="02_Mega_Projects_Lines.js"></script>
+<script src="District_Population.js"></script>
+  // Landuse files
+  <script src ="Agricultural.js"></script>
+  <script src ="Cemeteries.js"></script>
+  <script src = "Commercial.js"></script>
+  <script src = "Cultural.js"></script>
+  <script src = "Educational.js"></script>
+  <script src = "Government_Services.js"></script>
+  <script src = "Health_Services.js"></script>
+  <script src = "Industrial.js"></script>
+  <script src = "Mosques.js"></script>
+  <script src = "Transfer_Services.js"></script>
+  <script src = "Unknown.js"></script>
+  <script src = "Warehouse_Storage.js"></script>
+  
+  //Too large files
+  //<script src ="Business_Professional.js"></script>
+  //<script src = "Communications_Public_Facilities.js"></script>
+  //<script src = "Recreational_Gardens.js"></script>
+  //<script src = "Residential.js"></script>
+  <script src = "White_Lands.js"></script>
+
+<script>
+
+    var map = L.map('map').setView([24.7136, 46.6753], 9);
+
+var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+});
+osm.addTo(map);
+// geoJSON boundary files
+   // Existing Urban Networks
+      // Major Layers
+var urbanTest = L.geoJSON(urbanBoundary,{
+    style: function (feature) {
+        return {color: 'red', opacity: 0.8};
+    }});
+var municipalBoundaryTest = L.geoJSON(municipalBoundary,{
+    style: function (feature) {
+        return {color: '#00FFFF', opacity: 0.8};
+    }}).addTo(map);
+var districtBoundaryTest = L.geoJSON(districtBoundary);
+var megaproject1 = L.geoJSON(megaProject1,{
+    style: function (feature) {
+        return {color: '#FFBF00', opacity: 0.4};
+    }});
+var megaproject2 = L.geoJSON(megaProject2,{
+    style: function (feature) {
+        return {color: '#FFBF00', opacity: 0.4};
+    }});
+var districtpopulation = L.geoJSON(districtPopulation);
+// landuse layers
+var agri = L.geoJSON(agriCultural,{
+    style: function (feature) {
+        return {color: '#FFFF00', opacity: 0.6};
+    }}).addTo(map);
+var cemeteries = L.geoJSON(Cemeteries,{
+    style: function (feature) {
+        return {color: '#808080', opacity: 0.6};
+    }});
+var commercial = L.geoJSON(Commercial,{
+    style: function (feature) {
+        return {color: '#FFA500', opacity: 0.6};
+    }});
+var cultural = L.geoJSON(Cultural,{
+    style: function (feature) {
+        return {color: '#00FF00', opacity: 0.6};
+    }});
+var Educational = L.geoJSON(educational,{
+    style: function (feature) {
+        return {color: '#FFFF00', opacity: 0.6};
+    }});
+var Governmentservices = L.geoJSON(governmentServices,{
+    style: function (feature) {
+        return {color: '#808000', opacity: 0.6};
+    }});
+var Healthservices = L.geoJSON(healthServices,{
+    style: function (feature) {
+        return {color: 'red', opacity: 0.6};
+    }});
+var Industrial = L.geoJSON(industrial,{
+    style: function (feature) {
+        return {color: '#964B00', opacity: 0.6};
+    }});
+var Mosques = L.geoJSON(mosques,{
+    style: function (feature) {
+        return {color: '#008080', opacity: 0.6};
+    }});
+var Transfersrvices = L.geoJSON(transferServices,{
+    style: function (feature) {
+        return {color: '#808000', opacity: 0.6};
+    }});
+var Unknown  = L.geoJSON(unKnown,{
+    style: function (feature) {
+        return {color: '#000000', opacity: 0.6};
+    }});
+var Warehouse = L.geoJSON(wareHouse,{
+    style: function (feature) {
+        return {color: '#964B00', opacity: 0.6};
+    }});
+//var businessprofessionals = L.geoJSON(businessProfessionls).addTo(map);
+//var communication = L.geoJSON(Communications).addTo(map);
+//boundary layers
+var ExistingUN = {
+    "Urban Boundary":urbanTest,
+    "Municipality Boundary":municipalBoundaryTest,
+    "District Boundary":districtBoundaryTest,
+        }
+ var megaProjects = {
+    "MegaProject1":megaproject1,
+    "MegaProject2":megaproject2,
+    "District Population":districtpopulation,
+    "Agricultural":agri,
+    "Cemetries":cemeteries,
+    "Commercial":commercial,
+    "Cultural":cultural,
+    "Educuational": Educational,
+    "Government Services":Governmentservices,
+    "Health Services":Healthservices,
+    "Industrial":Industrial,
+    "Mosques":Mosques,
+    "Transfer Services":Transfersrvices,
+    "Unknown":Unknown,
+    "Ware House":Warehouse
+    //"Business Professionals":businessprofessionals
+    //"Communications":communication
+ }   
+ 
+ //Layer controls
+L.control.layers(ExistingUN,megaProjects).addTo(map);
+</script>
