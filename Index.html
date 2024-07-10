@@ -23,6 +23,7 @@
 
         .leaflet-popup-content {
             width: 1200px;
+            z-index: 3000;
         }
 
         #buttonColor {
@@ -91,6 +92,26 @@
         .info.legend img {
             width: 100%;
             height: auto;
+        }
+
+        .popup-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #ddd;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .popup-table th,
+        .popup-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .popup-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -348,7 +369,12 @@
                     if (geojsonLayer) {
                         map.removeLayer(geojsonLayer);
                     }
-                    var geojsonLayer = L.geoJSON(JSON.parse(content)).addTo(map);
+                    var geojsonLayer = L.geoJSON(JSON.parse(content), {
+                        onEachFeature: function (feature, layer) {
+                            //console.log("GeoJSON Features:",feature.properties);
+                            layer.bindPopup('<pre>'+JSON.stringify(feature.properties,null,' ').replace(/[\{\}"]/g,'')+'</pre>');
+                        }
+                    }).addTo(map);
                     map.fitBounds(geojsonLayer.getBounds());
                     console.log("GeoJSON Layer:", geojsonLayer);
                     console.log("GeoJSON Layer Bounds:", geojsonLayer.getBounds());
@@ -361,15 +387,7 @@
             reader.readAsText(file);
         }
     });
-    // Function to handle click event -- Test function - Not working
-    function clickCheck(feature, layer) {
-        var prop1 = e.target.Feature.properties;
-        var popupContent = "<p>Name: " + properties.NAME_ENGLI + "</p>";
 
-        //layer.bindPopup("info:" );
-        //layer.bindPopup(popupContent);
-
-    }
 
 
     // Layers RM InfraStructure
@@ -391,8 +409,17 @@
                 //layer.bindPopup(feature.properties.NAME_ENGLI);
                 //layer.bindPopup('<b>Coordinates:</b> ${center_lat,center_long}');
                 //layer.off('click');
-
-                layer.bindPopup("Feature Name: " + featureName + "<br>Boundary: " + boundaryBox).openPopup();
+                layer.bindPopup(
+                    "<table class='popup-table'>" +
+                    "<tr><th>OBJECT ID1</th><td>" + feature.properties.OBJECTID_1 + "</td></tr>" +
+                    "<tr><th>OBJECTID</th><td>" + feature.properties.OBJECTID + "</td></tr>" +
+                    "<tr><th>SUB MUNICIPALITY</th><td>" + feature.properties.SUBMUNIC_1 + "</td></tr>" +
+                    "<tr><th>CODE ID</th><td>" + feature.properties.CodeID + "</td></tr>" +
+                    "<tr><th>NAME</th><td>" + feature.properties.NAME_ENGLI + "</td></tr>" +
+                    "<tr><th>Municipality Name</th><td>" +
+                    "</table>"
+                ).openPopup();
+                //layer.bindPopup("Feature Name: " + featureName + "<br>Boundary: " + boundaryBox).openPopup();
                 //layer.on('mouseover', function (e) { this.openPopup(); })
             },
         }).addTo(map);
@@ -402,7 +429,36 @@
         {
             style: bridgecolor,
             onEachFeature: function (feature, layer) {
-                layer.bindPopup(feature.properties.STREETANAM);
+                //layer.bindPopup(feature.properties.STREETANAM);
+                layer.bindPopup(
+                    "<table class='popup-table'>" +
+                    "<tr><th>STREET CLASS</th><td>" + feature.properties.STREETCLAS + "</td></tr>" +
+                    "<tr><th>STREET NAME</th><td>" + feature.properties.STREETNAM + "</td></tr>" +
+                    "<tr><th>OBJECT ID</th><td>" + feature.properties.OBJECTID + "</td></tr>" +
+                    "<tr><th>DISTRICT</th><td>" + feature.properties.DISTRICT + "</td></tr>" +
+                    "<tr><th>MUNICIPALITY</th><td>" + feature.properties.MUNICIPALI + "</td></tr>" +
+                    "<tr><th>DIVIDED</th><td>" +
+                    feature.properties.DIVIDED + "</td></tr>" +
+                    "<tr><th>IS COMMERCIAL</th><td>" +
+                    feature.properties.ISCOMMERCI + "</td></tr>" +
+                    "<tr><th>MINISTRY CIRCLE</th><td>" +
+                    feature.properties.MINISTRYCL + "</td></tr>" +
+                    "<tr><th>STREET ID</th><td>" +
+                    feature.properties.STREETID + "</td></tr>" +
+                    "<tr><th>STREET NAME ARABIC</th><td>" +
+                    feature.properties.STREETANAM + "</td></tr>" +
+                    "<tr><th>STREET WIDTH</th><td>" +
+                    feature.properties.STREETWIDTH + "</td></tr>" +
+                    "<tr><th>ENTRY EXITS</th><td>" +
+                    feature.properties.ENTRYEXITS + "</td></tr>" +
+                    "<tr><th>STREET NAME</th><td>" +
+                    feature.properties.STREETNAME + "</td></tr>" +
+                    "<tr><th>SUBTYPE CLASS</th><td>" +
+                    feature.properties.SUBTYPECLA + "</td></tr>" +
+                    "<tr><th>NOTES STREET</th><td>" +
+                    feature.properties.NOTESSTREET + "</td></tr>" +
+                    "</table>"
+                ).openPopup();
             }
         });
     var parksIcon = L.icon({
@@ -414,7 +470,26 @@
             return L.marker(latlng, { icon: parksIcon });
         },
         onEachFeature: function (feature, layer) {
-            layer.bindPopup(feature.properties.Name);
+            //layer.bindPopup(feature.properties.Name);
+            layer.bindPopup(
+                "<table class='popup-table'>" +
+                "<tr><th>م</th><td>" + feature.properties.م + "</td></tr>" +
+                "<tr><th>NAME</th><td>" + feature.properties.Name + "</td></tr>" +
+                "<tr><th>الاسم</th><td>" + feature.properties.الاسم + "</td></tr>" +
+                "<tr><th>المسا</th><td>" + feature.properties.المسا + "</td></tr>" +
+                "<tr><th>FIELD</th><td>" + feature.properties.Field12 + "</td></tr>" +
+                "<tr><th>الحي</th><td>" +
+                feature.properties.الحي + "</td></tr>" +
+                "<tr><th>البلد</th><td>" +
+                feature.properties.البلد + "</td></tr>" +
+                "<tr><th>النوع</th><td>" +
+                feature.properties.النوع + "</td></tr>" +
+                "<tr><th>LOCATION</th><td>" +
+                feature.properties.Location + "</td></tr>" +
+                "<tr><th>FIELD 2</th><td>" +
+                feature.properties.Field11 + "</td></tr>" +
+                "</table>"
+            ).openPopup();
         }
     });
     var majorroads = L.geoJSON(majorRoads, {
@@ -427,13 +502,74 @@
         {
             style: MRcolor,
             onEachFeature: function (feature, layer) {
-                layer.bindPopup(feature.properties.STREETANAM);
+                //layer.bindPopup(feature.properties.STREETANAM);
+                layer.bindPopup(
+                    "<table class='popup-table'>" +
+                    "<tr><th>STREET CLASS</th><td>" + feature.properties.STREETCLAS + "</td></tr>" +
+                    "<tr><th>STREET NAME</th><td>" + feature.properties.STREETENAM + "</td></tr>" +
+                    "<tr><th>OBJECT ID</th><td>" + feature.properties.OBJECTID + "</td></tr>" +
+                    "<tr><th>DISTRICT</th><td>" + feature.properties.DISTRICT + "</td></tr>" +
+                    "<tr><th>MUNICIPALITY</th><td>" + feature.properties.MUNICIPALI + "</td></tr>" +
+                    "<tr><th>DIVIDED</th><td>" +
+                    feature.properties.DIVIDED + "</td></tr>" +
+                    "<tr><th>IS COMMERCIAL</th><td>" +
+                    feature.properties.ISCOMMERCI + "</td></tr>" +
+                    "<tr><th>MINISTRY CIRCLE</th><td>" +
+                    feature.properties.MINISTRYCL + "</td></tr>" +
+                    "<tr><th>STREET ID</th><td>" +
+                    feature.properties.STREETID + "</td></tr>" +
+                    "<tr><th>STREET ARABIC NAME</th><td>" +
+                    feature.properties.STREETANAM + "</td></tr>" +
+                    "<tr><th>STREET NAMEC</th><td>" +
+                    feature.properties.STREETNAMC + "</td></tr>" +
+                    "<tr><th>STREET WIDTH</th><td>" +
+                    feature.properties.STREETWIDT + "</td></tr>" +
+                    "<tr><th>ENTRY EXITS</th><td>" +
+                    feature.properties.ENTRYEXITS + "</td></tr>" +
+                    "<tr><th>SUB TYPE CLASS</th><td>" +
+                    feature.properties.SUBTYPECLA + "</td></tr>" +
+                    "<tr><th>NOTE STREET</th><td>" +
+                    feature.properties.NOTESTREET + "</td></tr>" +
+
+                    "</table>"
+                ).openPopup();
             }
         });
     var highways = L.geoJSON(highWays, {
         style: highwaycolor,
         onEachFeature: function (feature, layer) {
-            layer.bindPopup(feature.properties.STREETANAM);
+            //layer.bindPopup(feature.properties.STREETANAM);
+            layer.bindPopup(
+                "<table class='popup-table'>" +
+                "<tr><th>STREET NAME</th><td>" + feature.properties.STREETNAME + "</td></tr>" +
+                "<tr><th>STREET CLASS</th><td>" + feature.properties.STREETCLAS + "</td></tr>" +
+                "<tr><th>STREET ARABIC NAME</th><td>" + feature.properties.STREETENAM + "</td></tr>" +
+                "<tr><th>OBJECT ID</th><td>" + feature.properties.OBJECTID + "</td></tr>" +
+                "<tr><th>DISTRICT</th><td>" + feature.properties.DISTRICT + "</td></tr>" +
+                "<tr><th>MUNICIPALITY</th><td>" + feature.properties.MUNICIPALI + "</td></tr>" +
+                "<tr><th>DIVIDED</th><td>" +
+                feature.properties.DIVIDED + "</td></tr>" +
+                "<tr><th>IS COMMERCIAL</th><td>" +
+                feature.properties.ISCOMMERCI + "</td></tr>" +
+                "<tr><th>MINISTRY CIRCLE</th><td>" +
+                feature.properties.MINISTRYCL + "</td></tr>" +
+                "<tr><th>STREET ID</th><td>" +
+                feature.properties.STREETID + "</td></tr>" +
+                "<tr><th>STREET ARABIC NAME</th><td>" +
+                feature.properties.STREETANAM + "</td></tr>" +
+                "<tr><th>STREET NAMEC</th><td>" +
+                feature.properties.STREETNAMC + "</td></tr>" +
+                "<tr><th>STREET WIDTH</th><td>" +
+                feature.properties.STREETWIDT + "</td></tr>" +
+                "<tr><th>ENTRY EXITS</th><td>" +
+                feature.properties.ENTRYEXITS + "</td></tr>" +
+                "<tr><th>SUB TYPE CLASS</th><td>" +
+                feature.properties.SUBTYPECLA + "</td></tr>" +
+                "<tr><th>NOTE STREET</th><td>" +
+                feature.properties.NOTESTREET + "</td></tr>" +
+
+                "</table>"
+            ).openPopup();
         }
     });
     var MBIcon = L.icon({
@@ -446,7 +582,15 @@
             return L.marker(latlng, { icon: MBIcon });
         },
         onEachFeature: function (feature, layer) {
-            layer.bindPopup(feature.properties.BULD_NAME);
+            //layer.bindPopup(feature.properties.BULD_NAME);
+            layer.bindPopup(
+                "<table class='popup-table'>" +
+                "<tr><th>N1</th><td>" + feature.properties.N1 + "</td></tr>" +
+                "<tr><th>BUILDING NAME</th><td>" + feature.properties.BULD_NAME + "</td></tr>" +
+                "<tr><th>E1</th><td>" + feature.properties.BULD_NAME + "</td></tr>" +
+                "<tr><th>FID</th><td>" + feature.properties.FID_ + "</td></tr>" +
+                "</table>"
+            ).openPopup();
         }
     });
     // checking code
@@ -455,7 +599,34 @@
             return L.circleMarker(latlng, streetpanelscolor)
         },
         onEachFeature: function (feature, layer) {
-            layer.bindPopup(feature.properties.CITY_NAME);
+            //layer.bindPopup(feature.properties.CITY_NAME);
+            layer.bindPopup(
+                "<table class='popup-table'>" +
+                "<tr><th>PANEL NUMBER</th><td>" + feature.properties.PANEL_NO + "</td></tr>" +
+                "<tr><th>TOTAL POLES</th><td>" + feature.properties.TOTALPOLES + "</td></tr>" +
+                "<tr><th>VADER NUMBER</th><td>" + feature.properties.VADER_NO + "</td></tr>" +
+                "<tr><th>STREET</th><td>" + feature.properties.STREET + "</td></tr>" +
+                "<tr><th>CITY NAME</th><td>" + feature.properties.CITY_NAME + "</td></tr>" +
+                "<tr><th>NEIGHBORHOOD</th><td>" + feature.properties.NEIGHBORHO + "</td></tr>" +
+                "<tr><th>CITY ID	</th><td>" + feature.properties.CITYID + "</td></tr>" +
+                "<tr><th>HAVE_CON_1</th><td>" + feature.properties.HAVE_CON_1 + "</td></tr>" +
+                "<tr><th>LAST UPDATED</th><td>" + feature.properties.LAST_UPDAT + "</td></tr>" +
+                "<tr><th>TRANSFORMED</th><td>" + feature.properties.TRANSFORME + "</td></tr>" +
+                "<tr><th>OBJECTID	</th><td>" + feature.properties.OBJECTID + "</td></tr>" +
+                "<tr><th>HAVE CONTRACT</th><td>" + feature.properties.HAVE_CONTR + "</td></tr>" +
+                "<tr><th>PROVINCE NAME	</th><td>" + feature.properties.PROVINCE_N + "</td></tr>" +
+                "<tr><th>NEIGHBOR_1</th><td>" + feature.properties.NEIGHBOR_1 + "</td></tr>" +
+                "<tr><th>ID</th><td>" + feature.properties.ID + "</td></tr>" +
+                "<tr><th>INSERT DATE</th><td>" + feature.properties.INSERT_DAT + "</td></tr>" +
+                "<tr><th>TOTAL LAMP	</th><td>" + feature.properties.TOTALLAMP + "</td></tr>" +
+                "<tr><th>ADDRESS</th><td>" + feature.properties.ADDRESS + "</td></tr>" +
+                "<tr><th>COUNTER NUMBER</th><td>" + feature.properties.COUNTER_NO + "</td></tr>" +
+                "<tr><th>TRANSFER 1</th><td>" + feature.properties.TRANSFOR_1 + "</td></tr>" +
+                "<tr><th>SUBSCRIPTION</th><td>" + feature.properties.SUBSCRIPTI + "</td></tr>" +
+                "<tr><th>PROVINCE ID</th><td>" + feature.properties.PROVINCEID + "</td></tr>" +
+                "<tr><th>CONTENT_TY</th><td>" + feature.properties.CONTENT_TY + "</td></tr>" +
+                "</table>"
+            ).openPopup();
             layer.on('click', function (e) {
                 map.setView([24.7136, 46.6753], 16)
             });
@@ -481,15 +652,16 @@
         onEachFeature: function (feature, layer) {
             //layer.bindPopup("CONTRACT NUMBER: " + feature.properties.CONTRACT_N + "<br>MATERIAL: " + feature.properties.MATERIAL + "<br>TO NODE: " + feature.properties.TO_NODE2 + "<br>REGION NUMBER: " + feature.properties.REGION_NO + "<br>FROM NODE: " + feature.properties.FROM_NODE + "<br>MUNICIPALITY NAME: " + feature.properties.MUNIC_NAME).openPopup(); // strom water
             layer.bindPopup(
-                "<table style='border-collapse: collapse;'>" +
-                "<tr><th style='border: 1px solid black; padding: 8px;'>Contract Number</th><td style='border: 1px solid black; padding: 8px;'>" + feature.properties.CONTRACT_N + "</td></tr>" +
-                "<tr><th style='border: 1px solid black; padding: 8px;'>Material</th><td style='border: 1px solid black; padding: 8px;'>" + feature.properties.MATERIAL + "</td></tr>" +
-                "<tr><th style='border: 1px solid black; padding: 8px;'>To Node</th><td style='border: 1px solid black; padding: 8px;'>" + feature.properties.TO_NODE2 + "</td></tr>" +
-                "<tr><th style='border: 1px solid black; padding: 8px;'>Region Number</th><td style='border: 1px solid black; padding: 8px;'>" + feature.properties.REGION_NO + "</td></tr>" +
-                "<tr><th style='border: 1px solid black; padding: 8px;'>From Node</th><td style='border: 1px solid black; padding: 8px;'>" + feature.properties.FROM_NODE + "</td></tr>" +
-                "<tr><th style='border: 1px solid black; padding: 8px;'>Municipality Name</th><td style='border: 1px solid black; padding: 8px;'>" + feature.properties.MUNIC_NAME + "</td></tr>" +
+                "<table class='popup-table'>" +
+                "<tr><th>Contract Number</th><td>" + feature.properties.CONTRACT_N + "</td></tr>" +
+                "<tr><th>Material</th><td>" + feature.properties.MATERIAL + "</td></tr>" +
+                "<tr><th>To Node</th><td>" + feature.properties.TO_NODE2 + "</td></tr>" +
+                "<tr><th>Region Number</th><td>" + feature.properties.REGION_NO + "</td></tr>" +
+                "<tr><th>From Node</th><td>" + feature.properties.FROM_NODE + "</td></tr>" +
+                "<tr><th>Municipality Name</th><td>" + feature.properties.MUNIC_NAME + "</td></tr>" +
                 "</table>"
             ).openPopup();
+
 
         }
     });
@@ -502,7 +674,26 @@
     var tunnels = L.geoJSON(Tunnels, {
         style: tunnelcolor,
         onEachFeature: function (feature, layer) {
-            layer.bindPopup(feature.properties.STREETANAM);
+            //layer.bindPopup(feature.properties.STREETANAM);
+            layer.bindPopup(
+                "<table class='popup-table'>" +
+                "<tr><th>STREET CLASS	</th><td>" + feature.properties.STREETCLAS + "</td></tr>" +
+                "<tr><th>STREET NAME</th><td>" + feature.properties.STREETENAM + "</td></tr>" +
+                "<tr><th>OBJECTID</th><td>" + feature.properties.OBJECTID + "</td></tr>" +
+                "<tr><th>DISTRICT	</th><td>" + feature.properties.DISTRICT + "</td></tr>" +
+                "<tr><th>MUNICIPALITY</th><td>" + feature.properties.MUNICIPALI + "</td></tr>" +
+                "<tr><th>DIVIDED</th><td>" + feature.properties.DIVIDED + "</td></tr>" +
+                "<tr><th>IS COMMERCIAL	</th><td>" + feature.properties.ISCOMMERCI + "</td></tr>" +
+                "<tr><th>MINISTRY CIRCLE</th><td>" + feature.properties.MINISTRYCL + "</td></tr>" +
+                "<tr><th>STREETID</th><td>" + feature.properties.STREETID + "</td></tr>" +
+                "<tr><th>STREET ARABIC NAME	</th><td>" + feature.properties.STREETANAM + "</td></tr>" +
+                "<tr><th>STREETNAMC		</th><td>" + feature.properties.STREETNAMC + "</td></tr>" +
+                "<tr><th>STREET WIDTH</th><td>" + feature.properties.STREETWIDT + "</td></tr>" +
+                "<tr><th>ENTRY EXITS	</th><td>" + feature.properties.ENTRYEXITS + "</td></tr>" +
+                "<tr><th>STREET NAME</th><td>" + feature.properties.STREETNAME + "</td></tr>" +
+                "<tr><th>SUBTYPE CLASS</th><td>" + feature.properties.SUBTYPECLA +
+                "</table>"
+            ).openPopup();
         }
     });
     var washIcon = L.icon({
@@ -512,7 +703,17 @@
 
     var washrooms = L.geoJSON(washRooms, {
         pointToLayer: function (feature, latlng) {
-            return L.marker(latlng, { icon: washIcon });
+            return L.marker(latlng, { icon: washIcon })
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup(
+                "<table class='popup-table'>" +
+                "<tr><th>F______</th><td>" + feature.properties.F______ + "</td></tr>" +
+                "<tr><th>F_________</th><td>" + feature.properties.F_________ + "</td></tr>" +
+                "<tr><th>F_</th><td>" + feature.properties.F_ + "</td></tr>" +
+                "</table>"
+            ).openPopup();
+
         }
     });
 
@@ -734,7 +935,7 @@
         div.innerHTML = legendTitle + legendContent;
         return div;
     };
-    
+
     // Handle click event to toggle legend
     map.on("click", function (event) {
         if (map.hasLayer(legend)) {
