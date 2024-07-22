@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Map</title>
+    <title>Riyadh Municipality GIS</title>
+    <link rel="icon" href="RMlogo.png" type="image/x-icon" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
@@ -21,6 +22,13 @@
             width: 100%;
         }
 
+        .image-container {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 10px;
+            z-index: -1000;
+        }
+
         .leaflet-popup-content {
             width: 1200px;
             z-index: 3000;
@@ -28,8 +36,9 @@
 
         #buttonColor {
             padding: 2px;
-            background-color: rgb(153, 153, 243);
-            color: rgb(10, 10, 10);
+            background-color: rgb(94, 94, 196);
+            color: rgb(240, 233, 233);
+
             cursor: default;
         }
 
@@ -94,6 +103,49 @@
             height: auto;
         }
 
+        .legend {
+            background: white;
+            padding: 10px;
+            border: 2px solid gray;
+            border-radius: 30px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .legendUN {
+            background: white;
+            padding: 10px;
+            border: 2px solid gray;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1000;
+            /* Ensure it's above other elements */
+        }
+
+        .legendTN {
+            background: white;
+            padding: 10px;
+            border: 2px solid gray;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1000;
+            /* Ensure it's above other elements */
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgb(50, 34, 143);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 50%;
+            font-size: 14px;
+        }
+
         .popup-table {
             width: 100%;
             border-collapse: collapse;
@@ -113,6 +165,11 @@
             background-color: #f2f2f2;
             font-weight: bold;
         }
+
+        /* Set display to none for image*/
+        #image {
+            display: none;
+        }
     </style>
 </head>
 
@@ -121,18 +178,22 @@
         <h1 style="color:rgb(239, 245, 240);" id="navtext">RIYADH MUNICIPALITY - INFRASTRUCTURE
         </h1>
         <ul>
-            <li><a href="http://127.0.0.1:5500/OnlineMap_VijayalakshmiG_12May2024_Task1/urbannetwork.html">URBAN </a>
+            <li><button id="buttonColor"><a
+                        href="http://127.0.0.1:5500/OnlineMap_VijayalakshmiG_12May2024_Task1/urbannetwork.html">URBAN
+                    </a></button>
             </li>
             <li></li>
-            <li> RM </li>
+            <li> <button type="button" onclick="showLegend()" id="btnID"> RM </button>
             <li></li>
-            <li> UTILITY </li>
+            <li> <button type="button" onclick="showLegendUN()" id="btnID"> Utility </button>
             <li></li>
-            <li> TRANSPORT </li>
+            <li> <button type="button" onclick="showLegendTN()" id="btnID"> Transport </button>
         </ul>
 
     </nav>
-    <div id="map"> </div>
+    <div id="map">
+
+    </div>
     <div class="coordinates"></div>
 </body>
 <input type="file" id="fileInput" style="display: none;" multiple />
@@ -153,13 +214,10 @@
 <script src="Highways.js"></script>
 <script src="Major Roads.js"></script>
 <script src="Tunnels.js"></script>
-<script src="Existing Storm Water.js"></script>
 <script src="Major Streets.js"></script>
-<script src="Street Lighting Panels.js"></script>
-<script src="Street Lighting Poles.js"></script>
 <script src="Wash Rooms.js"></script>
 <script src="Municipal Buildings.js"></script>
-<script src="Existing Parks.js"></script>
+
 
 <script src="Airport Boundary.js"></script>
 <script src="BRT_Bus_Stations.js"></script>
@@ -181,26 +239,19 @@
 <script src="Existing_Electricity_Power_Plants.js"></script>
 <script src="Existing_Electricity_Sub_Station.js"></script>
 <script src="Existing_Electricity_Towers.js"></script>
-<script src="Existing_Sewage.js"></script>
 <script src="Existing_Telecom.js"></script>
-<script src="Existing_Water.js"></script>
-<script src="Fiber_Networks.js"></script>
-<script src="Power_Lines_Proposed_Route.js"></script>
 <script src="Powerplant.png"></script>
 
 <script src="Urban_Boundary1.js"></script>
 <script src="Districts_Boundary.js"></script>
 <script src="01_Mega_Projects.js"></script>
 <script src="02_Mega_Projects_Lines.js"></script>
-<script src="District_Population.js"></script>
 <script src="Agricultural.js"></script>
 <script src="Cemeteries.js"></script>
 <script src="Commercial.js"></script>
-<script src="Cultural.js"></script>
 <script src="Educational.js"></script>
 <script src="Government_Services.js"></script>
 <script src="Health_Services.js"></script>
-<script src="Industrial.js"></script>
 <script src="Mosques.js"></script>
 <script src="Transfer_Services.js"></script>
 <script src="Unknown.js"></script>
@@ -243,6 +294,81 @@
     // removes leaflet from attribution in the bottom
     //map.attributionControl.setPrefix(false);
 
+    // Function to add image overlay to button clik
+    //  legend event listener -- RM infrastructure
+    var legendControl;
+    function showLegend() {
+        if (!legendControl) {
+            legendControl = L.control({ position: 'bottomright' });
+
+            legendControl.onAdd = function (map) {
+                var div = L.DomUtil.create('div', 'legend');
+                //div.innerHTML = '<img src="RM_Infra.png" alt="Legend">';
+                div.innerHTML = `<button class="close-btn" onclick="closeLegend()">×</button>
+                        <img src="RM_Infra.png" alt="Legend">`;
+                return div;
+            };
+
+            legendControl.addTo(map);
+        }
+    }
+    function closeLegend() {
+        if (legendControl) {
+            map.removeControl(legendControl);
+            legendControl = null;
+        }
+    }
+    //Urban Infrastructre
+    var legendControlUN;
+    function showLegendUN() {
+        if (!legendControlUN) {
+            legendControlUN = L.control({ position: 'bottomright' });
+
+            legendControlUN.onAdd = function (map) {
+                var div = L.DomUtil.create('div', 'legendUN');
+                div.innerHTML = `
+                        <button class="close-btn" onclick="closeLegendUN()">×</button>
+                        <img src="Urban_Infra.png" alt="Legend1" style="max-width: 100%; height: auto;">
+                    `;
+                return div;
+            };
+
+            legendControlUN.addTo(map);
+        }
+    }
+
+    function closeLegendUN() {
+        if (legendControlUN) {
+            map.removeControl(legendControlUN);
+            legendControlUN = null;
+        }
+    }
+
+    //Transport Infrastructre legend popup
+    var legendControlTN;
+    function showLegendTN() {
+        if (!legendControlTN) {
+            legendControlTN = L.control({ position: 'bottomright' });
+
+            legendControlTN.onAdd = function (map) {
+                var div = L.DomUtil.create('div', 'legendTN');
+                div.innerHTML = `
+                        <button class="close-btn" onclick="closeLegendTN()">×</button>
+                        <img src="TN_Infra.png" alt="Legend2" style="max-width: 100%; height: auto;">
+                    `;
+                return div;
+            };
+
+            legendControlTN.addTo(map);
+        }
+    }
+
+    function closeLegendTN() {
+        if (legendControlTN) {
+            map.removeControl(legendControlTN);
+            legendControlTN = null;
+        }
+    }
     //Styling colors and Icons
     var color = {
         "color": "#FF0000",
@@ -372,7 +498,7 @@
                     var geojsonLayer = L.geoJSON(JSON.parse(content), {
                         onEachFeature: function (feature, layer) {
                             //console.log("GeoJSON Features:",feature.properties);
-                            layer.bindPopup('<pre>'+JSON.stringify(feature.properties,null,' ').replace(/[\{\}"]/g,'')+'</pre>');
+                            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
                         }
                     }).addTo(map);
                     map.fitBounds(geojsonLayer.getBounds());
@@ -465,37 +591,16 @@
         iconUrl: 'Park.png',
         iconSize: [20, 20], // size of the icon
     });
-    var existingparks = L.geoJSON(existingParks, {
-        pointToLayer: function (feature, latlng) {
-            return L.marker(latlng, { icon: parksIcon });
-        },
-        onEachFeature: function (feature, layer) {
-            //layer.bindPopup(feature.properties.Name);
-            layer.bindPopup(
-                "<table class='popup-table'>" +
-                "<tr><th>م</th><td>" + feature.properties.م + "</td></tr>" +
-                "<tr><th>NAME</th><td>" + feature.properties.Name + "</td></tr>" +
-                "<tr><th>الاسم</th><td>" + feature.properties.الاسم + "</td></tr>" +
-                "<tr><th>المسا</th><td>" + feature.properties.المسا + "</td></tr>" +
-                "<tr><th>FIELD</th><td>" + feature.properties.Field12 + "</td></tr>" +
-                "<tr><th>الحي</th><td>" +
-                feature.properties.الحي + "</td></tr>" +
-                "<tr><th>البلد</th><td>" +
-                feature.properties.البلد + "</td></tr>" +
-                "<tr><th>النوع</th><td>" +
-                feature.properties.النوع + "</td></tr>" +
-                "<tr><th>LOCATION</th><td>" +
-                feature.properties.Location + "</td></tr>" +
-                "<tr><th>FIELD 2</th><td>" +
-                feature.properties.Field11 + "</td></tr>" +
-                "</table>"
-            ).openPopup();
-        }
+    var existingparks = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Existing Parks',
+        layers: 'Infrastructure_Layers:Existing Parks',
+        format: "image/png",
+        transparent: 'true'
     });
     var majorroads = L.geoJSON(majorRoads, {
         style: MRcolor,
         onEachFeature: function (feature, layer) {
-            layer.bindPopup(feature.properties.STREETANAM);
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var majorstreets = L.geoJSON(majorStreets,
@@ -594,76 +699,23 @@
         }
     });
     // checking code
-    var streetpanels = L.geoJSON(streetPanels, {
-        pointToLayer: function (feature, latlng) {
-            return L.circleMarker(latlng, streetpanelscolor)
-        },
-        onEachFeature: function (feature, layer) {
-            //layer.bindPopup(feature.properties.CITY_NAME);
-            layer.bindPopup(
-                "<table class='popup-table'>" +
-                "<tr><th>PANEL NUMBER</th><td>" + feature.properties.PANEL_NO + "</td></tr>" +
-                "<tr><th>TOTAL POLES</th><td>" + feature.properties.TOTALPOLES + "</td></tr>" +
-                "<tr><th>VADER NUMBER</th><td>" + feature.properties.VADER_NO + "</td></tr>" +
-                "<tr><th>STREET</th><td>" + feature.properties.STREET + "</td></tr>" +
-                "<tr><th>CITY NAME</th><td>" + feature.properties.CITY_NAME + "</td></tr>" +
-                "<tr><th>NEIGHBORHOOD</th><td>" + feature.properties.NEIGHBORHO + "</td></tr>" +
-                "<tr><th>CITY ID	</th><td>" + feature.properties.CITYID + "</td></tr>" +
-                "<tr><th>HAVE_CON_1</th><td>" + feature.properties.HAVE_CON_1 + "</td></tr>" +
-                "<tr><th>LAST UPDATED</th><td>" + feature.properties.LAST_UPDAT + "</td></tr>" +
-                "<tr><th>TRANSFORMED</th><td>" + feature.properties.TRANSFORME + "</td></tr>" +
-                "<tr><th>OBJECTID	</th><td>" + feature.properties.OBJECTID + "</td></tr>" +
-                "<tr><th>HAVE CONTRACT</th><td>" + feature.properties.HAVE_CONTR + "</td></tr>" +
-                "<tr><th>PROVINCE NAME	</th><td>" + feature.properties.PROVINCE_N + "</td></tr>" +
-                "<tr><th>NEIGHBOR_1</th><td>" + feature.properties.NEIGHBOR_1 + "</td></tr>" +
-                "<tr><th>ID</th><td>" + feature.properties.ID + "</td></tr>" +
-                "<tr><th>INSERT DATE</th><td>" + feature.properties.INSERT_DAT + "</td></tr>" +
-                "<tr><th>TOTAL LAMP	</th><td>" + feature.properties.TOTALLAMP + "</td></tr>" +
-                "<tr><th>ADDRESS</th><td>" + feature.properties.ADDRESS + "</td></tr>" +
-                "<tr><th>COUNTER NUMBER</th><td>" + feature.properties.COUNTER_NO + "</td></tr>" +
-                "<tr><th>TRANSFER 1</th><td>" + feature.properties.TRANSFOR_1 + "</td></tr>" +
-                "<tr><th>SUBSCRIPTION</th><td>" + feature.properties.SUBSCRIPTI + "</td></tr>" +
-                "<tr><th>PROVINCE ID</th><td>" + feature.properties.PROVINCEID + "</td></tr>" +
-                "<tr><th>CONTENT_TY</th><td>" + feature.properties.CONTENT_TY + "</td></tr>" +
-                "</table>"
-            ).openPopup();
-            layer.on('click', function (e) {
-                map.setView([24.7136, 46.6753], 16)
-            });
-        }
+    var streetpanels = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Street Lightening Panels',
+        layers: 'Infrastructure_Layers:Street Lighting Panels',
+        format: "image/png",
+        transparent: 'true'
     });
-    var stPoles = L.geoJSON(streetPoles, {
-        pointToLayer: function (feature, latlng) {
-            return L.circleMarker(latlng, streetpanelscolor)
-        },
-        onEachFeature: function (feature, layer) {
-            layer.bindPopup(feature.properties.CITY_NAME);
-
-        }
+    var stPoles = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Street Lighting Poles',
+        layers: 'Infrastructure_Layers:Street Lighting Poles',
+        format: "image/png",
+        transparent: 'true'
     });
-    var stromWaterColor = {
-        "color": "#0070FF",
-        "radius": 4,
-        "fillOpacity": 0
-
-    };
-    var exStromWater = L.geoJSON(existingStromWater, {
-        style: MRcolor,
-        onEachFeature: function (feature, layer) {
-            //layer.bindPopup("CONTRACT NUMBER: " + feature.properties.CONTRACT_N + "<br>MATERIAL: " + feature.properties.MATERIAL + "<br>TO NODE: " + feature.properties.TO_NODE2 + "<br>REGION NUMBER: " + feature.properties.REGION_NO + "<br>FROM NODE: " + feature.properties.FROM_NODE + "<br>MUNICIPALITY NAME: " + feature.properties.MUNIC_NAME).openPopup(); // strom water
-            layer.bindPopup(
-                "<table class='popup-table'>" +
-                "<tr><th>Contract Number</th><td>" + feature.properties.CONTRACT_N + "</td></tr>" +
-                "<tr><th>Material</th><td>" + feature.properties.MATERIAL + "</td></tr>" +
-                "<tr><th>To Node</th><td>" + feature.properties.TO_NODE2 + "</td></tr>" +
-                "<tr><th>Region Number</th><td>" + feature.properties.REGION_NO + "</td></tr>" +
-                "<tr><th>From Node</th><td>" + feature.properties.FROM_NODE + "</td></tr>" +
-                "<tr><th>Municipality Name</th><td>" + feature.properties.MUNIC_NAME + "</td></tr>" +
-                "</table>"
-            ).openPopup();
-
-
-        }
+    var exStromWater = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Existing Strom Water',
+        layers: 'Infrastructure_Layers:Existing Strom Water',
+        format: "image/png",
+        transparent: 'true'
     });
 
 
@@ -722,6 +774,9 @@
     var airportboundary = L.geoJSON(airportBoundary, {
         style: function (feature) {
             return { color: '#BEE8FF' };
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var brtbus = L.icon({
@@ -731,27 +786,42 @@
     var Brtbusstations = L.geoJSON(brtBusstations, {
         pointToLayer: function (feature, latlng) {
             return L.marker(latlng, { icon: brtbus });
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
 
     var Brtroute = L.geoJSON(brtRoute, {
         style: function (feature) {
             return { color: '#E64C00' };
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var Buscircularstation = L.geoJSON(busCircularstation, {
         style: function (feature) {
             return { color: '#E64C00' };
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var Buscommunityroute = L.geoJSON(busCommunityRoute, {
         style: function (feature) {
             return { color: '#E64C00' };
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var Busfeederroute = L.geoJSON(busFeederRoute, {
         style: function (feature) {
             return { color: '#E64C00' };
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var housingIcon = L.icon({
@@ -762,16 +832,25 @@
     var Bushousing = L.geoJSON(busHousing, {
         pointToLayer: function (feature, latlng) {
             return L.marker(latlng, { icon: housingIcon });
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var Busstations = L.geoJSON(busStations, {
         pointToLayer: function (feature, latlng) {
             return L.marker(latlng, { icon: brtbus });
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var Existingrailway = L.geoJSON(existingRailway, {
         style: function (feature) {
             return { color: '#0000FF' };
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var mhousingIcon = L.icon({
@@ -781,17 +860,26 @@
     var Metrohousing = L.geoJSON(metroHousing, {
         pointToLayer: function (feature, latlng) {
             return L.marker(latlng, { icon: mhousingIcon });
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var MetroParking = L.geoJSON(metroparking, {
         pointToLayer: function (feature, latlng) {
             return L.marker(latlng, { icon: mhousingIcon });
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var MetrolinesDesign = L.geoJSON(metroLinesDesign);
     var Metroparking = L.geoJSON(metroparking, {
         pointToLayer: function (feature, latlng) {
             return L.circleMarker(latlng, color4)
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var metroIcon = L.icon({
@@ -802,6 +890,9 @@
     var Metrostations = L.geoJSON(metroStations, {
         pointToLayer: function (feature, latlng) {
             return L.marker(latlng, { icon: metroIcon });
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var tccColor = {
@@ -812,6 +903,9 @@
     var Transportcontrolcenter = L.geoJSON(transportControlCenter, {
         pointToLayer: function (feature, latlng) {
             return L.circleMarker(latlng, tccColor)
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
 
@@ -820,11 +914,17 @@
     var existingaramcopipeline = L.geoJSON(existingAramcoPipeline, {
         style: function (feature) {
             return { color: '#730000' };
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var existingelectricitypowerlines = L.geoJSON(existingElectricitypowerlines, {
         style: function (feature) {
             return { color: '#0000FF' };
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var ppIcon = L.icon({
@@ -834,6 +934,9 @@
     var existingelectricitypowerplants = L.geoJSON(existinglectricityPowerplants, {
         pointToLayer: function (feature, latlng) {
             return L.marker(latlng, { icon: ppIcon });
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
 
@@ -845,11 +948,17 @@
     var existingelectricitysubstations = L.geoJSON(existingElectricitySubstations, {
         pointToLayer: function (feature, latlng) {
             return L.marker(latlng, { icon: eSubstationicon });
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var existingTelecom = L.geoJSON(exTelecom, {
         style: function (feature) {
             return { color: '#FF00C5' };
+        },
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup('<pre>' + JSON.stringify(feature.properties, null, ' ').replace(/[\{\}"]/g, '') + '</pre>');
         }
     });
     var eTowersIcon = L.icon({
@@ -863,22 +972,30 @@
             return L.marker(latlng, { icon: eTowersIcon });
         }
     });
-    var existingsewage = L.geoJSON(existingSewage, {
-        style: function (feature) {
-            return { color: '#267300' };
-        }
+    var existingsewage = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Existing Sewage',
+        layers: 'Infrastructure_Layers:Existing_Sewage',
+        format: "image/png",
+        transparent: 'true'
     });
-    var existingwater = L.geoJSON(existingWater, {
-        style: function (feature) {
-            return { color: '#00C5FF' };
-        }
+    var existingwater = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Existing Water',
+        layers: 'Infrastructure_Layers:Existing_Water',
+        format: "image/png",
+        transparent: 'true'
     });
-    var fibernetworks = L.geoJSON(fiberNetworks, {
-        style: function (feature) {
-            return { color: '#8400A8' };
-        }
+    var fibernetworks = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Fiber Networks',
+        layers: '	Infrastructure_Layers:Fiber_Networks',
+        format: "image/png",
+        transparent: 'true'
     });
-    var powerlinesproposedroute = L.geoJSON(powerLinesProposedrout);
+    var powerlinesproposedroute = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Power Lines Proposed Route',
+        layers: '	Infrastructure_Layers:Power_Lines_Proposed_Route',
+        format: "image/png",
+        transparent: 'true'
+    });
 
     // Uraban Infrastructure
     var UBcolor = {
@@ -917,11 +1034,55 @@
             layer.bindPopup(feature.properties.Name);
         }
     });
-    var districtpopulation = L.geoJSON(districtPopulation);
+    //var districtpopulation = L.geoJSON(districtPopulation);
 
-    var wmsLayer = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/wms?', {
+    //var testing = "http://localhost:8080/geoserver/Infrastructure_Layers/ows?service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=District_Population";
+
+    var wmsLayer = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
         attribution: 'District Population',
-        layers: 'Infrastructure_Layers:District_Pop_Color',
+        layers: 'Infrastructure_Layers:District_Population',
+        format: "image/png",
+        transparent: 'true'
+    });
+    var wmsBProfessional = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Business Professional',
+        layers: 'Infrastructure_Layers:Business_Professional',
+        format: "image/png",
+        transparent: 'true'
+    });
+    var wmsCPF = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Infrastructure:Communication_Public_Facilities',
+        layers: 'Infrastructure_Layers:Communication_Public_Facilities',
+        format: "image/png",
+        transparent: 'true'
+    });
+    var wmsCultural = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Cultural',
+        layers: 'Infrastructure_Layers:Cultural',
+        format: "image/png",
+        transparent: 'true'
+    });
+    var wmsIndustrial = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Industrial',
+        layers: 'Infrastructure_Layers:Industrial',
+        format: "image/png",
+        transparent: 'true'
+    });
+    var wmsRGardens = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Recreational Gardens',
+        layers: 'Infrastructure_Layers:Recreational_Gardens',
+        format: "image/png",
+        transparent: 'true'
+    });
+    var wmsResidential = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Residential',
+        layers: 'Infrastructure_Layers:Residential',
+        format: "image/png",
+        transparent: 'true'
+    });
+    var wmsWhitelands = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'White Lands',
+        layers: 'Infrastructure_Layers:White_Lands',
         format: "image/png",
         transparent: 'true'
     });
@@ -930,20 +1091,25 @@
     legend.onAdd = function (map) {
         var div = L.DomUtil.create('div', 'info legend');
         var legendTitle = '<h4>District Population</h4>';  // Replace with your desired legend title
-        var legendContent = '<img src="http://localhost:8080/geoserver/Infrastructure_Layers/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=District_Pop_Color" alt="legend">';
+        var legendContent = '<img src="http://localhost:8080/geoserver/Infrastructure_Layers/ows?service=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=District_Population&style=dist_pop" alt="legend">';
         //div.innerHTML = '<img src="http://localhost:8080/geoserver/Infrastructure_Layers/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=District_Pop_Color" alt="legend">';
         div.innerHTML = legendTitle + legendContent;
         return div;
     };
 
     // Handle click event to toggle legend
-    map.on("click", function (event) {
-        if (map.hasLayer(legend)) {
-            map.removeControl(legend); // Remove legend if it exists
-        } else {
-            legend.addTo(map); // Add legend if it doesn't exist
-        }
-    });
+      // Add event listeners for layer add and remove
+      map.on('layeradd', function(event) {
+            if (event.layer === wmsLayer) {
+                legend.addTo(map); // Add legend when WMS layer is added
+            }
+        });
+
+        map.on('layerremove', function(event) {
+            if (event.layer === wmsLayer) {
+                map.removeControl(legend); // Remove legend when WMS layer is removed
+            }
+        });
 
     // landuse layers
     var agriColor = {
@@ -957,36 +1123,20 @@
         }
     });
 
-    var cemetryColor = {
-        "color": "#FFEABE",
-        "radius": 4
-    };
-    var cemeteries = L.geoJSON(Cemeteries, {
-        style: cemetryColor,
-        onEachFeature: function (feature, layer) {
-            layer.bindPopup(feature.properties.AREANAME);
-        }
+    var cemeteries = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Cemetries',
+        layers: 'Infrastructure_Layers:Cemetries',
+        format: "image/png",
+        transparent: 'true'
     });
-    var commercialColor = {
-        "color": "#FF0000",
-        "radius": 4
-    };
-    var commercial = L.geoJSON(Commercial, {
-        style: commercialColor,
-        onEachFeature: function (feature, layer) {
-            layer.bindPopup(feature.properties.SECTORNAME);
-        }
+
+    var commercial = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Commercial',
+        layers: 'Infrastructure_Layers:Commercial',
+        format: "image/png",
+        transparent: 'true'
     });
-    var culturalColor = {
-        "color": "#E9EBBE",
-        "radius": 4
-    };
-    var cultural = L.geoJSON(Cultural, {
-        style: culturalColor,
-        onEachFeature: function (feature, layer) {
-            layer.bindPopup(feature.properties.SECTORNAME);
-        }
-    });
+
     var eduColor = {
         "color": "#00C5FF",
         "radius": 4
@@ -997,15 +1147,11 @@
             layer.bindPopup(feature.properties.SECTORNAME);
         }
     });
-    var GSColor = {
-        "color": "#A83800",
-        "radius": 4
-    };
-    var Governmentservices = L.geoJSON(governmentServices, {
-        style: GSColor,
-        onEachFeature: function (feature, layer) {
-            layer.bindPopup(feature.properties.SECTORNAME);
-        }
+    var Governmentservices = L.tileLayer.betterWms('http://localhost:8080/geoserver/Infrastructure_Layers/ows?', {
+        attribution: 'Government Services',
+        layers: 'Infrastructure_Layers:Government_Services',
+        format: "image/png",
+        transparent: 'true'
     });
     var HSColor = {
         "color": "#004DA8",
@@ -1017,16 +1163,7 @@
             layer.bindPopup(feature.properties.SECTORNAME);
         }
     });
-    var indColor = {
-        "color": "#8400A8",
-        "radius": 4
-    };
-    var Industrial = L.geoJSON(industrial, {
-        style: indColor,
-        onEachFeature: function (feature, layer) {
-            layer.bindPopup(feature.properties.HAYNAME);
-        }
-    });
+
     var mosColor = {
         "color": "#BEFFE8",
         "radius": 4
@@ -1127,20 +1264,28 @@
                 collapsed: true,
                 children: [
                     { label: "<img src='Agriculture.png' width = 20 /> <span>Agricultural</span>", layer: agri },
+                    { label: "<img src='Agriculture.png' width = 20 /> <span>Business Professional</span>", layer: wmsBProfessional },
                     { label: "<img src='Cemetry.png' width = 20 /> <span>Cemetries</span>", layer: cemeteries },
                     { label: " <img src='commercial.png' width = 20 /><span>Commercial</span>", layer: commercial },
+                    { label: " <img src='commercial.png' width = 20 /><span>Communications Public Facilities</span>", layer: wmsCPF },
+                    { label: " <img src='commercial.png' width = 20 /><span>Cultural</span>", layer: wmsCultural },
                     { label: " <img src='educational.png' width = 20 /><span>Educational</span>", layer: Educational },
                     { label: " <img src='governmentServices.png' width = 20 /><span>Government Services</span>", layer: Governmentservices },
                     { label: " <img src='healthServices.png' width = 20 /><span>Health Services</span>", layer: Healthservices },
+                    { label: " <img src='healthServices.png' width = 20 /><span>Industrial</span>", layer: wmsIndustrial },
                     { label: " <img src='Mosques.png' width = 20 /><span>Mosques</span>", layer: Mosques },
+                    { label: " <img src='Mosques.png' width = 20 /><span>Recreational Gardens</span>", layer: wmsRGardens },
+                    { label: " <img src='Mosques.png' width = 20 /><span>Residential</span>", layer: wmsResidential },
                     { label: " <img src='transferServices.png' width = 20 /><span>Transfer services</span>", layer: Transfersrvices },
                     { label: " <img src='unknown.png' width = 20 /><span>Unknown</span>", layer: Unknown },
-                    { label: " <img src='warehouse.png' width = 20 /><span>Warehouse</span>", layer: Warehouse }
+                    { label: " <img src='warehouse.png' width = 20 /><span>Warehouse Storage</span>", layer: Warehouse },
+                    { label: " <img src='warehouse.png' width = 20 /><span>White Lands</span>", layer: wmsWhitelands }
                 ]
             },
             { label: "<img src='urbanBoundary.png' width = 20 /><span>Urban Boundary</span>", layer: urbanTest },
             { label: "<img src='MunBoundary.png' width = 20 /><span>Municipality Boundary</span>", layer: municipalBoundaryTest },
-            { label: "<img src='districtBoundary.png' width = 20 /><span>District Boundary</span>", layer: wmsLayer },
+            { label: "<img src='districtBoundary.png' width = 20 /><span>District Boundary</span>", layer: districtBoundaryTest },
+            { label: "<img src='districtBoundary.png' width = 20 /><span>District Population</span>", layer: wmsLayer },
                 //{label:'Municipality Boundary', layer:municipalBoundaryTest}
 
             ]
@@ -1196,15 +1341,7 @@
                         { label: "<img src='aramcoPipelines.png' width = 15 /><span>Power Line Proposed Route</span>", layer: powerlinesproposedroute }
                     ]
                 },
-                {
-                    label: 'Roads & Lightings',
-                    collapsed: true,
-                    children: [
-                        { label: 'Major Streets', layer: majorstreets },
-                        { label: 'Street Lighting Panels', layer: streetpanels }
 
-                    ]
-                },
                 { label: "<img src='existingSewage.png' width = 15 /><span>Existing Sewage</span>", layer: existingsewage },
                 { label: "<img src='existingWater.png' width = 15 /><span>Existing Water</span>", layer: existingwater },
                 { label: "<img src='existingWater.png' width = 15 /><span>Existing Telecom</span>", layer: existingTelecom },
